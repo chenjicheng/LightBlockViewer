@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "com.example.lightblockviewer.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"LightBlockMixin",
+		"AbstractBlockMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

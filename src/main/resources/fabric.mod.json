@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "lightblockviewer",
+	"version": "${version}",
+	"name": "LightBlockViewer",
+	"description": "See, interact with, adjust brightness, and break light blocks in survival mode.",
+	"authors": [
+		"LightBlockViewer"
+	],
+	"contact": {},
+	"license": "MIT",
+	"icon": "assets/lightblockviewer/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.example.lightblockviewer.LightBlockViewer"
+		],
+		"client": [
+			"com.example.lightblockviewer.client.LightBlockViewerClient"
+		],
+		"modmenu": [
+			"com.example.lightblockviewer.client.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"lightblockviewer.mixins.json",
+		{
+			"config": "lightblockviewer.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.18.2",
+		"minecraft": "~1.21.11",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"modmenu": "*"
+	}
+}

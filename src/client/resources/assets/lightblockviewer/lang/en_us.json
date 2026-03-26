@@ -1,0 +1,8 @@
+{
+	"lightblockviewer.config.title": "LightBlockViewer Settings",
+	"lightblockviewer.config.enabled": "Light Block Viewer: ON",
+	"lightblockviewer.config.disabled": "Light Block Viewer: OFF",
+	"lightblockviewer.config.modifier": "Modifier Key",
+	"lightblockviewer.config.keybind": "Toggle Key",
+	"lightblockviewer.config.pressKey": "Press a key..."
+}

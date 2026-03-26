@@ -1,0 +1,8 @@
+{
+	"lightblockviewer.config.title": "光源方块查看器 设置",
+	"lightblockviewer.config.enabled": "光源方块查看器：已开启",
+	"lightblockviewer.config.disabled": "光源方块查看器：已关闭",
+	"lightblockviewer.config.modifier": "修饰键",
+	"lightblockviewer.config.keybind": "切换快捷键",
+	"lightblockviewer.config.pressKey": "请按一个键..."
+}

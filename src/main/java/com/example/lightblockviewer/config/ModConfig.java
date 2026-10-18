@@ -1,18 +1,16 @@
 package com.example.lightblockviewer.config;
 
 import com.example.lightblockviewer.LightBlockViewer;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 
 public class ModConfig {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir()
             .resolve(LightBlockViewer.MOD_ID + ".json");
 
@@ -22,24 +20,19 @@ public class ModConfig {
     private Modifier modifier = Modifier.CTRL;
 
     public enum Modifier {
-        NONE("无 / None"),
-        CTRL("Ctrl"),
-        ALT("Alt"),
-        SHIFT("Shift");
-
-        private final String displayName;
-
-        Modifier(String displayName) {
-            this.displayName = displayName;
-        }
-
-        public String getDisplayName() {
-            return displayName;
-        }
+        NONE,
+        CTRL,
+        ALT,
+        SHIFT;
 
         public Modifier next() {
             Modifier[] values = values();
             return values[(ordinal() + 1) % values.length];
+        }
+
+        /** Translation key of the display name, e.g. {@code lightblockviewer.config.modifier.ctrl}. */
+        public String getTranslationKey() {
+            return "lightblockviewer.config.modifier." + name().toLowerCase(Locale.ROOT);
         }
     }
 
@@ -66,17 +59,13 @@ public class ModConfig {
         this.modifier = modifier;
     }
 
-    public String getKeyDisplayName() {
+    /** Display name of the configured key on its own, e.g. {@code L} or {@code F5}. */
+    public String getKeyName() {
         String keyName = GLFW.glfwGetKeyName(keyCode, 0);
         if (keyName == null) {
-            keyName = getSpecialKeyName(keyCode);
-        } else {
-            keyName = keyName.toUpperCase();
+            return getSpecialKeyName(keyCode);
         }
-        if (modifier == Modifier.NONE) {
-            return keyName;
-        }
-        return modifier.getDisplayName() + " + " + keyName;
+        return keyName.toUpperCase(Locale.ROOT);
     }
 
     private static String getSpecialKeyName(int keyCode) {
@@ -114,7 +103,7 @@ public class ModConfig {
 
     public void save() {
         try {
-            Files.writeString(CONFIG_PATH, GSON.toJson(new ConfigData(keyCode, modifier.name())));
+            Files.writeString(CONFIG_PATH, ConfigCodec.toJson(new ConfigCodec.Data(keyCode, modifier.name())));
         } catch (IOException e) {
             LightBlockViewer.LOGGER.error("Failed to save config", e);
         }
@@ -122,22 +111,33 @@ public class ModConfig {
 
     private static ModConfig load() {
         ModConfig config = new ModConfig();
-        if (Files.exists(CONFIG_PATH)) {
-            try {
-                ConfigData data = GSON.fromJson(Files.readString(CONFIG_PATH), ConfigData.class);
-                if (data != null) {
-                    config.keyCode = data.keyCode;
-                    try {
-                        config.modifier = Modifier.valueOf(data.modifier);
-                    } catch (IllegalArgumentException ignored) {
-                    }
-                }
-            } catch (IOException e) {
-                LightBlockViewer.LOGGER.error("Failed to load config", e);
-            }
+        if (!Files.exists(CONFIG_PATH)) {
+            return config;
         }
+
+        try {
+            ConfigCodec.Data data = ConfigCodec.parse(Files.readString(CONFIG_PATH));
+            if (data == null) {
+                LightBlockViewer.LOGGER.warn("Config {} is not a valid config file, using defaults", CONFIG_PATH);
+            } else {
+                config.apply(data);
+            }
+        } catch (IOException e) {
+            LightBlockViewer.LOGGER.error("Failed to read config, using defaults", e);
+        }
+
         return config;
     }
 
-    private record ConfigData(int keyCode, String modifier) {}
+    /** Applies stored values, keeping the defaults for anything missing or unknown. */
+    private void apply(ConfigCodec.Data data) {
+        if (data.keyCode() > 0) {
+            keyCode = data.keyCode();
+        }
+
+        Modifier storedModifier = ConfigCodec.parseModifier(data.modifier());
+        if (storedModifier != null) {
+            modifier = storedModifier;
+        }
+    }
 }

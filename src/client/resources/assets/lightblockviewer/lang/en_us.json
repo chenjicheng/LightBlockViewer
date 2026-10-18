@@ -2,7 +2,13 @@
 	"lightblockviewer.config.title": "LightBlockViewer Settings",
 	"lightblockviewer.config.enabled": "Light Block Viewer: ON",
 	"lightblockviewer.config.disabled": "Light Block Viewer: OFF",
+	"lightblockviewer.config.notConnected": "Not connected to a server",
 	"lightblockviewer.config.modifier": "Modifier Key",
+	"lightblockviewer.config.modifier.none": "None",
+	"lightblockviewer.config.modifier.ctrl": "Ctrl",
+	"lightblockviewer.config.modifier.alt": "Alt",
+	"lightblockviewer.config.modifier.shift": "Shift",
 	"lightblockviewer.config.keybind": "Toggle Key",
-	"lightblockviewer.config.pressKey": "Press a key..."
+	"lightblockviewer.config.pressKey": "Press a key...",
+	"lightblockviewer.message.noServerSupport": "Light Block Viewer: the server did not accept the toggle. The mod is probably not installed on the server."
 }

@@ -30,6 +30,7 @@ public class LightBlockViewer implements ModInitializer {
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
             if (state.getBlock() instanceof LightBlock
                     && player instanceof ServerPlayer serverPlayer
+                    && !serverPlayer.isCreative()
                     && PlayerToggleState.isEnabled(serverPlayer)) {
                 int lightLevel = state.getValue(LightBlock.LEVEL);
                 ItemStack lightItem = new ItemStack(Items.LIGHT);

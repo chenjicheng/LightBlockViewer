@@ -3,6 +3,7 @@ package com.example.lightblockviewer.client;
 import com.example.lightblockviewer.config.ModConfig;
 import com.example.lightblockviewer.network.TogglePayload;
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.Window;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -15,31 +16,32 @@ public final class KeyBindings {
     private KeyBindings() {}
 
     public static void onClientTick(Minecraft client) {
-        if (client.getWindow() == null || client.screen != null) return;
+        Window window = client.getWindow();
+        if (window == null) return;
 
-        com.mojang.blaze3d.platform.Window window = client.getWindow();
         ModConfig config = ModConfig.get();
-
         boolean modifierHeld = isModifierHeld(window, config.getModifier());
         boolean keyDown = InputConstants.isKeyDown(window, config.getKeyCode());
         boolean pressed = modifierHeld && keyDown && !wasPressed;
+        // Tracked even while a screen is open, so the key has to be released again to toggle.
         wasPressed = modifierHeld && keyDown;
 
-        if (pressed && client.player != null) {
-            boolean newState = !ClientToggleState.isEnabled();
-            ClientToggleState.setEnabled(newState);
-            ClientPlayNetworking.send(new TogglePayload(newState));
+        if (client.player == null) return;
 
-            // Show on-screen notification
+        // An unanswered request means the server did not accept it.
+        if (ClientToggleState.tickPending()) {
             client.player.displayClientMessage(
-                    Component.translatable(newState
-                            ? "lightblockviewer.config.enabled"
-                            : "lightblockviewer.config.disabled"),
-                    true);
+                    Component.translatable("lightblockviewer.message.noServerSupport"), false);
+        }
+
+        if (client.screen != null) return;
+
+        if (pressed) {
+            ClientPlayNetworking.send(new TogglePayload(ClientToggleState.requestToggle()));
         }
     }
 
-    private static boolean isModifierHeld(com.mojang.blaze3d.platform.Window window, ModConfig.Modifier modifier) {
+    private static boolean isModifierHeld(Window window, ModConfig.Modifier modifier) {
         return switch (modifier) {
             case NONE -> true;
             case CTRL -> InputConstants.isKeyDown(window, GLFW.GLFW_KEY_LEFT_CONTROL)
